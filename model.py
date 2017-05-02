@@ -42,13 +42,11 @@ def calculate_similarity_mat(tfidf_matrix,
                                           tfidf_matrix.shape[0]))
     degrees = np.zeros(shape=(tfidf_matrix.shape[0]))
 
-    threshold = 0.05
-
     # get cosine similarities between sentences
     for i, sent1 in enumerate(tfidf_matrix):
         for j, sent2 in enumerate(tfidf_matrix):
             calculated_cosine_similarity = cosine_similarity(sent1, sent2)
-            if calculated_cosine_similarity > threshold:
+            if calculated_cosine_similarity > similarity_threshold:
                 cosine_similarities[i, j] = calculated_cosine_similarity
                 degrees[i] += 1
             else:
@@ -67,14 +65,14 @@ def calc_power_method(similarity_matrix,
     than this
     max_loops: sets the maximum number of times for the loop to run
     """
-    threshold = 0.0005
     p_initial = np.ones(shape=len(degrees))/len(degrees)
     i = 0
+    # loop until no change between successive matrix iterations
     while True:
         i += 1
         p_update = np.matmul(cosine_similarities.T, p_initial)
         delta = np.linalg.norm(p_update - p_initial)
-        if delta <= threshold:
+        if delta < stopping_criterion or i >= max_loops:
             break
         else:
             p_initial = p_update
